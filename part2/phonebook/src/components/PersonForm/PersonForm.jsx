@@ -1,4 +1,10 @@
-const PersonForm = ({ onSubmit, name, onNameChange, phone, onPhoneChange }) => {
+const PersonForm = ({
+  onSubmit,
+  name,
+  onNameChange,
+  number,
+  onNumberChange,
+}) => {
   return (
     <form onSubmit={onSubmit}>
       <div>
@@ -8,7 +14,7 @@ const PersonForm = ({ onSubmit, name, onNameChange, phone, onPhoneChange }) => {
 
       <div>
         number:{" "}
-        <input type="tel" value={phone} onChange={onPhoneChange} required />
+        <input type="tel" value={number} onChange={onNumberChange} required />
       </div>
 
       <div>

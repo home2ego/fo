@@ -1,9 +1,10 @@
-const Persons = ({ filteredPersons }) => {
+const Persons = ({ filteredPersons, onDelete }) => {
   return (
     <ul>
       {filteredPersons.map((person) => (
-        <li key={person.name}>
-          {person.name} {person.phone}
+        <li key={person.id}>
+          {person.name} {person.number}{" "}
+          <button onClick={() => onDelete(person)}>delete</button>
         </li>
       ))}
     </ul>
