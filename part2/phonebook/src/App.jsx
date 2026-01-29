@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
+import personService from "./services/persons";
+import Notification from "./components/Notification/Notification";
 import Filter from "./components/Filter/Filter";
 import PersonForm from "./components/PersonForm/PersonForm";
 import Persons from "./components/Persons/Persons";
-import personService from "./services/persons";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [query, setQuery] = useState("");
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     personService.getAll().then((initialPersons) => setPersons(initialPersons));
@@ -27,9 +30,14 @@ const App = () => {
       const newPerson = { name: newName, number: newNumber };
 
       personService.create(newPerson).then((returnedPerson) => {
+        setSuccessMessage(`Added ${returnedPerson.name}`);
         setPersons([...persons, returnedPerson]);
         setNewName("");
         setNewNumber("");
+
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 2000);
       });
 
       return;
@@ -41,17 +49,33 @@ const App = () => {
     if (isUniqueNumber) {
       const newPerson = { ...person, number: newNumber };
 
-      personService.update(person.id, newPerson).then((returnedPerson) => {
-        setPersons(
-          persons.map((p) =>
-            p.id === returnedPerson.id
-              ? { ...p, number: returnedPerson.number }
-              : p,
-          ),
-        );
-        setNewName("");
-        setNewNumber("");
-      });
+      personService
+        .update(person.id, newPerson)
+        .then((returnedPerson) => {
+          setSuccessMessage(`Changed ${person.name} phone number`);
+          setPersons(
+            persons.map((p) =>
+              p.id === returnedPerson.id
+                ? { ...p, number: returnedPerson.number }
+                : p,
+            ),
+          );
+          setNewName("");
+          setNewNumber("");
+
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 2000);
+        })
+        .catch(() => {
+          setErrorMessage(
+            `Information of ${person.name} has already been removed from server`,
+          );
+
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 2000);
+        });
 
       return;
     }
@@ -72,6 +96,11 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+
+      <Notification
+        successMessage={successMessage}
+        errorMessage={errorMessage}
+      />
 
       <Filter query={query} onQueryChange={(e) => setQuery(e.target.value)} />
 
