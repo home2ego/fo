@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+app.use(express.json());
 
 let persons = [
   {
@@ -57,6 +58,27 @@ app.delete("/api/persons/:id", (req, res) => {
   persons = persons.filter((p) => p.id !== id);
 
   res.sendStatus(204);
+});
+
+function generateId() {
+  return String(Math.trunc(Math.random() * 1_000_000 + 1));
+}
+
+app.post("/api/persons", (req, res) => {
+  const person = req.body;
+
+  if (!person.name || !person.number) {
+    return res.status(400).json({ error: "Invalid JSON" });
+  }
+
+  const newPerson = {
+    ...person,
+    id: generateId(),
+  };
+
+  persons = [...persons, newPerson];
+
+  res.status(201).json(persons);
 });
 
 const PORT = 3001;
