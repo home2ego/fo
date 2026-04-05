@@ -68,7 +68,17 @@ app.post("/api/persons", (req, res) => {
   const person = req.body;
 
   if (!person.name || !person.number) {
-    return res.status(400).json({ error: "Invalid JSON" });
+    return res
+      .status(400)
+      .json({ error: "Invalid JSON. Missing name or number" });
+  }
+
+  const hasName = persons.some(
+    (p) => p.name.toLowerCase().trim() === person.name.toLowerCase().trim(),
+  );
+
+  if (hasName) {
+    return res.status(400).json({ error: "Name must be unique" });
   }
 
   const newPerson = {
@@ -78,7 +88,7 @@ app.post("/api/persons", (req, res) => {
 
   persons = [...persons, newPerson];
 
-  res.status(201).json(persons);
+  res.status(201).json(newPerson);
 });
 
 const PORT = 3001;
