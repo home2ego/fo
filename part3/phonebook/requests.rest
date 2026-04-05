@@ -21,3 +21,7 @@ Content-Type: application/json
     "name": "John Doe",
     "number": "050-555111"
 }
+
+###
+
+GET http://localhost:3001/wrongEndpoint
