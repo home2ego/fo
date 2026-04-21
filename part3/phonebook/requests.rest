@@ -6,11 +6,11 @@ GET http://localhost:3001/info
 
 ###
 
-GET http://localhost:3001/api/persons/2
+GET http://localhost:3001/api/persons/11
 
 ###
 
-DELETE http://localhost:3001/api/persons/3
+DELETE http://localhost:3001/api/persons/69e73f28cf0dbd9571133016
 
 ###
 
@@ -18,8 +18,17 @@ POST http://localhost:3001/api/persons
 Content-Type: application/json
 
 {
-    "name": "John Doe",
-    "number": "050-555111"
+    "name": "Anna",
+    "number": "555-555"
+}
+
+###
+
+PATCH http://localhost:3001/api/persons/69e71d2a61d3f4dd354a41e5
+Content-Type: application/json
+
+{
+    "number": "111-111"
 }
 
 ###

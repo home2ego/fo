@@ -24,10 +24,13 @@ const App = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const isUniqueName = persons.every((p) => p.name !== newName);
+    const trimNewName = newName.trim();
+    const isUniqueName = persons.every(
+      (p) => p.name.toLowerCase() !== trimNewName.toLowerCase(),
+    );
 
     if (isUniqueName) {
-      const newPerson = { name: newName, number: newNumber };
+      const newPerson = { name: trimNewName, number: newNumber };
 
       personService.create(newPerson).then((returnedPerson) => {
         setSuccessMessage(`Added ${returnedPerson.name}`);
@@ -43,7 +46,9 @@ const App = () => {
       return;
     }
 
-    const person = persons.find((p) => p.name === newName);
+    const person = persons.find(
+      (p) => p.name.toLowerCase() === trimNewName.toLowerCase(),
+    );
     const isUniqueNumber = person.number !== newNumber;
 
     if (isUniqueNumber) {
@@ -67,7 +72,9 @@ const App = () => {
             setSuccessMessage(null);
           }, 2000);
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log(err.response.data);
+
           setErrorMessage(
             `Information of ${person.name} has already been removed from server`,
           );
@@ -80,16 +87,17 @@ const App = () => {
       return;
     }
 
-    return alert(`${newName} is already added to phonebook`);
+    return alert(`${person.name} is already added to phonebook`);
   };
 
   const handleDelete = (person) => {
     const shouldDelete = window.confirm(`Delete ${person.name}?`);
 
     if (shouldDelete) {
-      personService.deleteData(person.id).then((returnedPerson) => {
-        setPersons(persons.filter((person) => person.id !== returnedPerson.id));
-      });
+      personService
+        .deleteData(person.id)
+        .then(() => setPersons(persons.filter((p) => p.id !== person.id)))
+        .catch((err) => console.log(err.response.data.error));
     }
   };
 

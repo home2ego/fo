@@ -1,111 +1,90 @@
+require("dotenv").config();
 const express = require("express");
-const morgan = require("morgan");
+const Person = require("./models/person");
+
 const app = express();
 
-let persons = [
-  {
-    id: "1",
-    name: "Arto Hellas",
-    number: "040-123456",
-  },
-  {
-    id: "2",
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  },
-  {
-    id: "3",
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  },
-  {
-    id: "4",
-    name: "Mary Poppendieck",
-    number: "39-23-6423122",
-  },
-];
-
 app.use(express.json());
-
-morgan.token("body", (req) => {
-  return req.method === "POST" ? JSON.stringify(req.body) : " ";
-});
-app.use(
-  morgan(":method :url :status :res[content-length] - :response-time ms :body"),
-);
-
 app.use(express.static("dist"));
 
+app.use((req, res, next) => {
+  console.log(req.method, req.url);
+  next();
+});
+
 app.get("/api/persons", (req, res) => {
-  res.json(persons);
+  Person.find({}).then((persons) => res.json(persons));
 });
 
 app.get("/info", (req, res) => {
-  const html = `<p>Phonebook has info for ${persons.length} people</p>
+  Person.countDocuments().then((count) => {
+    const html = `<p>Phonebook has info for ${count} people</p>
 <p>${new Date().toString()}</p>`;
 
-  res.send(html);
+    res.send(html);
+  });
 });
 
 app.get("/api/persons/:id", (req, res) => {
-  const id = req.params.id;
-  const person = persons.find((p) => p.id === id);
+  Person.findById(req.params.id)
+    .then((person) => {
+      if (person) {
+        return res.json(person);
+      }
 
-  if (person) {
-    return res.json(person);
-  }
-
-  res.status(404).json({ error: "Person not found" });
+      res.status(404).json({ error: "Person not found" });
+    })
+    .catch(() => res.status(400).json({ error: "Invalid data" }));
 });
 
 app.delete("/api/persons/:id", (req, res) => {
-  const id = req.params.id;
-
-  const personExists = persons.some((p) => p.id === id);
-  if (!personExists) {
-    return res.status(404).json({ error: "Person not found" });
-  }
-
-  persons = persons.filter((p) => p.id !== id);
-
-  res.sendStatus(204);
+  Person.findByIdAndDelete(req.params.id)
+    .then((deletedPerson) =>
+      deletedPerson
+        ? res.sendStatus(204)
+        : res.status(404).json({ error: "Person not found" }),
+    )
+    .catch(() => res.status(400).json({ error: "Invalid data" }));
 });
 
-function generateId() {
-  return String(Math.trunc(Math.random() * 1_000_000 + 1));
-}
-
 app.post("/api/persons", (req, res) => {
-  const person = req.body;
+  const { name, number } = req.body;
 
-  if (!person.name || !person.number) {
+  if (!name || !number) {
     return res
       .status(400)
       .json({ error: "Invalid JSON. Missing name or number" });
   }
 
-  const hasName = persons.some(
-    (p) => p.name.toLowerCase().trim() === person.name.toLowerCase().trim(),
-  );
+  Person.findOne({ name }).then((existingPerson) => {
+    if (existingPerson) {
+      return res.status(400).json({ error: "Name must be unique" });
+    }
 
-  if (hasName) {
-    return res.status(400).json({ error: "Name must be unique" });
-  }
+    const person = new Person({
+      name,
+      number,
+    });
 
-  const newPerson = {
-    ...person,
-    id: generateId(),
-  };
-
-  persons = [...persons, newPerson];
-
-  res.status(201).json(newPerson);
+    person.save().then((savedPerson) => res.status(201).json(savedPerson));
+  });
 });
 
-const unknownEndpoint = (req, res) => {
+app.patch("/api/persons/:id", (req, res) => {
+  const { number } = req.body;
+
+  Person.findByIdAndUpdate(req.params.id, { number }, { new: true })
+    .then((updatedPerson) =>
+      updatedPerson
+        ? res.json(updatedPerson)
+        : res.status(404).json({ error: "Person not found" }),
+    )
+    .catch(() => res.status(400).json({ error: "Invalid data" }));
+});
+
+app.use((req, res) => {
   res.status(404).json({ error: "Unknown endpoint" });
-};
-app.use(unknownEndpoint);
+});
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
