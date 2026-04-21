@@ -4,9 +4,8 @@ const Person = require("./models/person");
 
 const app = express();
 
-app.use(express.json());
 app.use(express.static("dist"));
-
+app.use(express.json());
 app.use((req, res, next) => {
   console.log(req.method, req.url);
   next();
@@ -25,7 +24,7 @@ app.get("/info", (req, res) => {
   });
 });
 
-app.get("/api/persons/:id", (req, res) => {
+app.get("/api/persons/:id", (req, res, next) => {
   Person.findById(req.params.id)
     .then((person) => {
       if (person) {
@@ -34,17 +33,17 @@ app.get("/api/persons/:id", (req, res) => {
 
       res.status(404).json({ error: "Person not found" });
     })
-    .catch(() => res.status(400).json({ error: "Invalid data" }));
+    .catch((err) => next(err));
 });
 
-app.delete("/api/persons/:id", (req, res) => {
+app.delete("/api/persons/:id", (req, res, next) => {
   Person.findByIdAndDelete(req.params.id)
     .then((deletedPerson) =>
       deletedPerson
         ? res.sendStatus(204)
         : res.status(404).json({ error: "Person not found" }),
     )
-    .catch(() => res.status(400).json({ error: "Invalid data" }));
+    .catch((err) => next(err));
 });
 
 app.post("/api/persons", (req, res) => {
@@ -56,34 +55,38 @@ app.post("/api/persons", (req, res) => {
       .json({ error: "Invalid JSON. Missing name or number" });
   }
 
-  Person.findOne({ name }).then((existingPerson) => {
-    if (existingPerson) {
-      return res.status(400).json({ error: "Name must be unique" });
-    }
-
-    const person = new Person({
-      name,
-      number,
-    });
-
-    person.save().then((savedPerson) => res.status(201).json(savedPerson));
+  const person = new Person({
+    name,
+    number,
   });
+
+  person.save().then((savedPerson) => res.status(201).json(savedPerson));
 });
 
-app.patch("/api/persons/:id", (req, res) => {
-  const { number } = req.body;
+app.put("/api/persons/:id", (req, res, next) => {
+  const { name, number } = req.body;
 
-  Person.findByIdAndUpdate(req.params.id, { number }, { new: true })
-    .then((updatedPerson) =>
-      updatedPerson
-        ? res.json(updatedPerson)
-        : res.status(404).json({ error: "Person not found" }),
-    )
-    .catch(() => res.status(400).json({ error: "Invalid data" }));
+  Person.findById(req.params.id)
+    .then((person) => {
+      if (!person) {
+        return res.status(404).json({ error: "Person not found" });
+      }
+
+      person.name = name;
+      person.number = number;
+
+      person.save().then((updatedPerson) => res.json(updatedPerson));
+    })
+    .catch((err) => next(err));
 });
 
 app.use((req, res) => {
   res.status(404).json({ error: "Unknown endpoint" });
+});
+app.use((err, req, res, next) => {
+  if (err.name === "CastError") {
+    res.status(400).json({ error: "Malformatted ID" });
+  }
 });
 
 const PORT = process.env.PORT || 3001;
