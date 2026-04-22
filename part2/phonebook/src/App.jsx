@@ -46,8 +46,6 @@ const App = () => {
         })
         .catch((err) => {
           setErrorMessage(err.response.data.error);
-          setNewName("");
-          setNewNumber("");
 
           setTimeout(() => {
             setErrorMessage(null);
@@ -85,8 +83,6 @@ const App = () => {
         })
         .catch((err) => {
           setErrorMessage(err.response.data.error);
-          setNewName("");
-          setNewNumber("");
 
           setTimeout(() => {
             setErrorMessage(null);
