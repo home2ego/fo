@@ -10,7 +10,7 @@ mongoose
   .catch((error) => console.log("error connecting to MongoDB:", error.message));
 
 const personSchema = new mongoose.Schema({
-  name: String,
+  name: { type: String, minLength: 3 },
   number: String,
   // number: { type: String, match: /^\d{3}-\d{6,7}$/ },
 });

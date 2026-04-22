@@ -32,16 +32,27 @@ const App = () => {
     if (isUniqueName) {
       const newPerson = { name: trimNewName, number: newNumber };
 
-      personService.create(newPerson).then((returnedPerson) => {
-        setSuccessMessage(`Added ${returnedPerson.name}`);
-        setPersons([...persons, returnedPerson]);
-        setNewName("");
-        setNewNumber("");
+      personService
+        .create(newPerson)
+        .then((returnedPerson) => {
+          setSuccessMessage(`Added ${returnedPerson.name}`);
+          setPersons([...persons, returnedPerson]);
+          setNewName("");
+          setNewNumber("");
 
-        setTimeout(() => {
-          setSuccessMessage(null);
-        }, 2000);
-      });
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 2000);
+        })
+        .catch((err) => {
+          setErrorMessage(err.response.data.error);
+          setNewName("");
+          setNewNumber("");
+
+          setTimeout(() => {
+            setErrorMessage(null);
+          }, 4000);
+        });
 
       return;
     }

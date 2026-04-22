@@ -46,7 +46,7 @@ app.delete("/api/persons/:id", (req, res, next) => {
     .catch((err) => next(err));
 });
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
   const { name, number } = req.body;
 
   if (!name || !number) {
@@ -55,12 +55,15 @@ app.post("/api/persons", (req, res) => {
       .json({ error: "Invalid JSON. Missing name or number" });
   }
 
-  const person = new Person({
+  const newPerson = new Person({
     name,
     number,
   });
 
-  person.save().then((savedPerson) => res.status(201).json(savedPerson));
+  newPerson
+    .save()
+    .then((savedPerson) => res.status(201).json(savedPerson))
+    .catch((err) => next(err));
 });
 
 app.put("/api/persons/:id", (req, res, next) => {
@@ -84,8 +87,12 @@ app.use((req, res) => {
   res.status(404).json({ error: "Unknown endpoint" });
 });
 app.use((err, req, res, next) => {
+  console.log(err.name);
+
   if (err.name === "CastError") {
     res.status(400).json({ error: "Malformatted ID" });
+  } else if (err.name === "ValidationError") {
+    res.status(400).json({ error: err.message });
   }
 });
 
