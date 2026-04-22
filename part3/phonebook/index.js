@@ -1,104 +1,102 @@
-require("dotenv").config();
-const express = require("express");
-const Person = require("./models/person");
+require('dotenv').config()
+const express = require('express')
+const Person = require('./models/person')
 
-const app = express();
+const app = express()
 
-app.use(express.static("dist"));
-app.use(express.json());
+app.use(express.static('dist'))
+app.use(express.json())
 app.use((req, res, next) => {
-  console.log(req.method, req.url);
-  next();
-});
+  console.log(req.method, req.url)
+  next()
+})
 
-app.get("/api/persons", (req, res) => {
-  Person.find({}).then((persons) => res.json(persons));
-});
+app.get('/api/persons', (req, res) => {
+  Person.find({}).then((persons) => res.json(persons))
+})
 
-app.get("/info", (req, res) => {
+app.get('/info', (req, res) => {
   Person.countDocuments().then((count) => {
     const html = `<p>Phonebook has info for ${count} people</p>
-<p>${new Date().toString()}</p>`;
+<p>${new Date().toString()}</p>`
 
-    res.send(html);
-  });
-});
+    res.send(html)
+  })
+})
 
-app.get("/api/persons/:id", (req, res, next) => {
+app.get('/api/persons/:id', (req, res, next) => {
   Person.findById(req.params.id)
     .then((person) => {
       if (person) {
-        return res.json(person);
+        return res.json(person)
       }
 
-      res.status(404).json({ error: "Person not found" });
+      res.status(404).json({ error: 'Person not found' })
     })
-    .catch((err) => next(err));
-});
+    .catch((err) => next(err))
+})
 
-app.delete("/api/persons/:id", (req, res, next) => {
+app.delete('/api/persons/:id', (req, res, next) => {
   Person.findByIdAndDelete(req.params.id)
     .then((deletedPerson) => {
-      if (deletedPerson) return res.sendStatus(204);
+      if (deletedPerson) return res.sendStatus(204)
 
-      res.status(404).json({ error: "Person not found" });
+      res.status(404).json({ error: 'Person not found' })
     })
-    .catch((err) => next(err));
-});
+    .catch((err) => next(err))
+})
 
-app.post("/api/persons", (req, res, next) => {
-  const { name, number } = req.body;
+app.post('/api/persons', (req, res, next) => {
+  const { name, number } = req.body
 
   if (!name || !number) {
-    return res
-      .status(400)
-      .json({ error: "Invalid JSON. Missing name or number" });
+    return res.status(400).json({ error: 'Invalid JSON. Missing name or number' })
   }
 
   const newPerson = new Person({
     name,
     number,
-  });
+  })
 
   newPerson
     .save()
     .then((savedPerson) => res.status(201).json(savedPerson))
-    .catch((err) => next(err));
-});
+    .catch((err) => next(err))
+})
 
-app.put("/api/persons/:id", (req, res, next) => {
-  const { name, number } = req.body;
+app.put('/api/persons/:id', (req, res, next) => {
+  const { name, number } = req.body
 
   Person.findById(req.params.id)
     .then((person) => {
       if (!person) {
-        return res.status(404).json({ error: "Person not found" });
+        return res.status(404).json({ error: 'Person not found' })
       }
 
-      person.name = name;
-      person.number = number;
+      person.name = name
+      person.number = number
 
-      return person.save();
+      return person.save()
     })
     .then((updatedPerson) => res.json(updatedPerson))
-    .catch((err) => next(err));
-});
+    .catch((err) => next(err))
+})
 
 app.use((req, res) => {
-  res.status(404).json({ error: "Unknown endpoint" });
-});
-app.use((err, req, res, next) => {
-  if (err.name === "CastError") {
-    return res.status(400).json({ error: "Malformatted ID" });
+  res.status(404).json({ error: 'Unknown endpoint' })
+})
+app.use((err, req, res, _next) => {
+  if (err.name === 'CastError') {
+    return res.status(400).json({ error: 'Malformatted ID' })
   }
 
-  if (err.name === "ValidationError") {
-    const firstError = Object.values(err.errors)[0];
-    return res.status(400).json({ error: firstError.message });
+  if (err.name === 'ValidationError') {
+    const firstError = Object.values(err.errors)[0]
+    return res.status(400).json({ error: firstError.message })
   }
-});
+})
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-  console.log(`Server running on ${PORT}`);
-});
+  console.log(`Server running on ${PORT}`)
+})
