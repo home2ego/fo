@@ -10,8 +10,23 @@ mongoose
   .catch((error) => console.log("error connecting to MongoDB:", error.message));
 
 const personSchema = new mongoose.Schema({
-  name: { type: String, minLength: 3 },
-  number: String,
+  name: {
+    type: String,
+    minLength: 3,
+  },
+  number: {
+    type: String,
+    validate: {
+      validator: (v) => {
+        const regexp = /^\d{2,3}-\d+$/.test(v);
+        if (!regexp) return false;
+
+        return v.length >= 8;
+      },
+      message:
+        "Phone number must be at least 8 characters in format XX-XXXXX or XXX-XXXX",
+    },
+  },
   // number: { type: String, match: /^\d{3}-\d{6,7}$/ },
 });
 

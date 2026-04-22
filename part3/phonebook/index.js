@@ -38,11 +38,11 @@ app.get("/api/persons/:id", (req, res, next) => {
 
 app.delete("/api/persons/:id", (req, res, next) => {
   Person.findByIdAndDelete(req.params.id)
-    .then((deletedPerson) =>
-      deletedPerson
-        ? res.sendStatus(204)
-        : res.status(404).json({ error: "Person not found" }),
-    )
+    .then((deletedPerson) => {
+      if (deletedPerson) return res.sendStatus(204);
+
+      res.status(404).json({ error: "Person not found" });
+    })
     .catch((err) => next(err));
 });
 
@@ -78,8 +78,9 @@ app.put("/api/persons/:id", (req, res, next) => {
       person.name = name;
       person.number = number;
 
-      person.save().then((updatedPerson) => res.json(updatedPerson));
+      return person.save();
     })
+    .then((updatedPerson) => res.json(updatedPerson))
     .catch((err) => next(err));
 });
 
@@ -87,12 +88,13 @@ app.use((req, res) => {
   res.status(404).json({ error: "Unknown endpoint" });
 });
 app.use((err, req, res, next) => {
-  console.log(err.name);
-
   if (err.name === "CastError") {
-    res.status(400).json({ error: "Malformatted ID" });
-  } else if (err.name === "ValidationError") {
-    res.status(400).json({ error: err.message });
+    return res.status(400).json({ error: "Malformatted ID" });
+  }
+
+  if (err.name === "ValidationError") {
+    const firstError = Object.values(err.errors)[0];
+    return res.status(400).json({ error: firstError.message });
   }
 });
 

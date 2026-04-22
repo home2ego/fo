@@ -42,7 +42,7 @@ const App = () => {
 
           setTimeout(() => {
             setSuccessMessage(null);
-          }, 2000);
+          }, 3000);
         })
         .catch((err) => {
           setErrorMessage(err.response.data.error);
@@ -51,7 +51,7 @@ const App = () => {
 
           setTimeout(() => {
             setErrorMessage(null);
-          }, 4000);
+          }, 3000);
         });
 
       return;
@@ -81,18 +81,16 @@ const App = () => {
 
           setTimeout(() => {
             setSuccessMessage(null);
-          }, 2000);
+          }, 3000);
         })
         .catch((err) => {
-          console.log(err.response.data);
-
-          setErrorMessage(
-            `Information of ${person.name} has already been removed from server`,
-          );
+          setErrorMessage(err.response.data.error);
+          setNewName("");
+          setNewNumber("");
 
           setTimeout(() => {
             setErrorMessage(null);
-          }, 2000);
+          }, 3000);
         });
 
       return;
