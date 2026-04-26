@@ -1,14 +1,13 @@
-const dummy = (_blogs) => 1
+const dummy = (_array) => 1
 
-const totalLikes = (blogs) => {
-  switch (blogs.length) {
-    case 0:
-      return 0
-    case 1:
-      return blogs[0].likes
-    default:
-      return blogs.reduce((acc, item) => acc + item.likes, 0)
-  }
+const totalLikes = (array) => {
+  return array.reduce((acc, item) => acc + item.likes, 0)
 }
 
-module.exports = { dummy, totalLikes }
+const favoriteBlog = (array) => {
+  if (array.length === 0) return {}
+
+  return array.reduce((acc, current) => (current.likes > acc.likes ? current : acc))
+}
+
+module.exports = { dummy, totalLikes, favoriteBlog }
