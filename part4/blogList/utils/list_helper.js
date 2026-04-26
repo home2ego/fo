@@ -30,4 +30,24 @@ const mostBlogs = (array) => {
   return topAuthor ? { author: topAuthor, blogs: topCount } : {}
 }
 
-module.exports = { dummy, totalLikes, favoriteBlog, mostBlogs }
+const mostLikes = (array) => {
+  const authorLikesSum = array.reduce((acc, current) => {
+    acc[current.author] = (acc[current.author] || 0) + current.likes
+
+    return acc
+  }, {})
+
+  let topAuthor = ''
+  let topLikes = 0
+
+  for (const name in authorLikesSum) {
+    if (authorLikesSum[name] > topLikes) {
+      topAuthor = name
+      topLikes = authorLikesSum[name]
+    }
+  }
+
+  return topAuthor ? { author: topAuthor, likes: topLikes } : {}
+}
+
+module.exports = { dummy, totalLikes, favoriteBlog, mostBlogs, mostLikes }
