@@ -61,7 +61,16 @@ test('succeeds in creating a new blog post', async () => {
   assert(titles.includes('Cooking'))
 })
 
-test('when likes property is missing from the request, it defaults to 0', async () => {
+test('fails with status code 400 if title or url properties are missing', async () => {
+  const newBlog = { author: 'Anna', likes: 12 }
+
+  await api.post('/api/blogs').send(newBlog).expect(400)
+
+  const blogs = await Blog.find({})
+  assert.strictEqual(blogs.length, initialBlogs.length)
+})
+
+test('when likes property is missing, it defaults to 0', async () => {
   const newBlog = { title: 'Cooking', author: 'Anna', url: 'http://bbc' }
 
   const response = await api
