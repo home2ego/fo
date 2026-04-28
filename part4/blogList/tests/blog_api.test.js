@@ -83,4 +83,17 @@ test('when likes property is missing, it defaults to 0', async () => {
   assert.strictEqual(createdBlog.likes, 0)
 })
 
+test('succeeds with status code 204 if id is valid', async () => {
+  const blogsAtStart = await Blog.find({})
+  const blogToDelete = blogsAtStart[0]
+
+  await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+
+  const blogsAtEnd = await Blog.find({})
+  const ids = blogsAtEnd.map((b) => b.id)
+
+  assert(!ids.includes(blogToDelete.id))
+  assert.strictEqual(blogsAtEnd.length, initialBlogs.length - 1)
+})
+
 after(async () => await mongoose.connection.close())

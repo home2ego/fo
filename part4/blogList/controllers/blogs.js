@@ -28,4 +28,12 @@ blogsRouter.post('/', (request, response) => {
   return blog.save().then((result) => response.status(201).json(result))
 })
 
+blogsRouter.delete('/:id', (request, response) => {
+  return Blog.findByIdAndDelete(request.params.id).then((deleted) => {
+    if (!deleted) return response.status(404).json({ error: 'Blog not found' })
+
+    return response.sendStatus(204)
+  })
+})
+
 module.exports = blogsRouter
