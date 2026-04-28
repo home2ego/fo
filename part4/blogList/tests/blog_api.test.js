@@ -12,23 +12,22 @@ const initialBlogs = [
   { title: 'Sport', author: 'Jane Doe', url: 'http://123456', likes: 123 },
 ]
 
-beforeEach(() => {
-  return Blog.deleteMany().then(() => Blog.insertMany(initialBlogs))
+beforeEach(async () => {
+  await Blog.deleteMany()
+  await Blog.insertMany(initialBlogs)
 })
 
-test('blogs are returned as json', () => {
-  return api
+test('blogs are returned as json', async () => {
+  await api
     .get('/api/blogs')
     .expect(200)
     .expect('Content-Type', /application\/json/)
 })
 
-test('all blogs are returned', () => {
-  return api.get('/api/blogs').then((response) => {
-    assert.deepStrictEqual(response.body.length, initialBlogs.length)
-  })
+test('all blogs are returned', async () => {
+  const response = await api.get('/api/blogs')
+
+  assert.deepStrictEqual(response.body.length, initialBlogs.length)
 })
 
-after(() => {
-  return mongoose.connection.close()
-})
+after(async () => await mongoose.connection.close())
