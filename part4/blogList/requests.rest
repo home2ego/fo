@@ -10,8 +10,7 @@ POST http://localhost:3003/api/blogs
 Content-Type: application/json
 
 {
-    "title": "Sport",
-    "author": "Jane Doe",
-    "url": "http://456",
-    "likes": 123
+    "title": "Cooking",
+    "author": "Anna",
+    "url": "http://bbb"
 }
