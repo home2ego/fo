@@ -7,6 +7,18 @@ blogsRouter.get('/', (request, response) => {
   })
 })
 
+blogsRouter.get('/:id', (request, response, next) => {
+  Blog.findById(request.params.id)
+    .then((blog) => {
+      if (!blog) {
+        return response.status(404).json({ error: 'blog not found' })
+      }
+
+      response.json(blog)
+    })
+    .catch((err) => next(err))
+})
+
 blogsRouter.post('/', (request, response) => {
   const blog = new Blog(request.body)
 

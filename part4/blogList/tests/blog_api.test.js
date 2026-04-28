@@ -30,4 +30,17 @@ test('all blogs are returned', async () => {
   assert.deepStrictEqual(response.body.length, initialBlogs.length)
 })
 
+test('blog fields are named id instead of _id', async () => {
+  const blogs = await Blog.find({})
+  const blogsAtStart = blogs.map((b) => b.toJSON())
+  const blogToView = blogsAtStart[0]
+
+  const response = await api
+    .get(`/api/blogs/${blogToView.id}`)
+    .expect(200)
+    .expect('Content-Type', /application\/json/)
+
+  assert.deepStrictEqual(blogToView, response.body)
+})
+
 after(async () => await mongoose.connection.close())
