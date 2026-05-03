@@ -36,4 +36,18 @@ blogsRouter.delete('/:id', (request, response) => {
   })
 })
 
+blogsRouter.put('/:id', (request, response) => {
+  const { likes } = request.body
+
+  return Blog.findById(request.params.id)
+    .then((blog) => {
+      if (!blog) return response.status(404).json({ error: 'Blog not found' })
+
+      blog.likes = likes
+
+      return blog.save()
+    })
+    .then((updated) => response.json(updated))
+})
+
 module.exports = blogsRouter

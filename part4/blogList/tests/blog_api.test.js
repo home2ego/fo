@@ -92,7 +92,7 @@ describe('addition of a blog', () => {
 describe('delition of a blog', () => {
   test('succeeds with status code 204 if id is valid', async () => {
     const blogsAtStart = await Blog.find({})
-    const blogToDelete = blogsAtStart[0]
+    const blogToDelete = blogsAtStart[0].toJSON()
 
     await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
 
@@ -101,6 +101,19 @@ describe('delition of a blog', () => {
 
     assert(!ids.includes(blogToDelete.id))
     assert.strictEqual(blogsAtEnd.length, initialBlogs.length - 1)
+  })
+})
+
+describe('updating of a blog', () => {
+  test('succeeds with updating the likes property of an existing blog', async () => {
+    const blogsAtStart = await Blog.find({})
+    const blogToUpdate = blogsAtStart[0]
+    const newLikes = blogToUpdate.likes + 1
+
+    await api.put(`/api/blogs/${blogToUpdate.id}`).send({ likes: newLikes }).expect(200)
+
+    const updatedBlog = await Blog.findById(blogToUpdate.id)
+    assert.strictEqual(updatedBlog.likes, newLikes)
   })
 })
 
